@@ -20,7 +20,7 @@ object YxdPvUv {
       .setMaster("local[*]")
       .setAppName("yxdtop")
     val sparkcontext = new SparkContext(conf)
-    val  path = "/eventLogs/2017/01/02/FlumeData.1483327088054.log"
+    val  path = "/eventLogs/2016/12/21/FlumeData.1482392151826.log"
     val  pathRdd = sparkcontext.textFile(path)
     val  lengthFilterRdd = pathRdd.filter(line => line.length>0)
     val  arrthreeFilterRdd =  lengthFilterRdd.filter(line =>line.split("\\^A").size==3 )
@@ -31,13 +31,16 @@ object YxdPvUv {
       var date:String=null
       val  dateTimeSArr = arr(1).split("\\.")
       var dateTime =""
+      var dtl = 0l
       if(dateTimeSArr!=null && dateTimeSArr.length>=0){
         dateTime = dateTimeSArr(0)
+        dtl = dateTime.toLong*1000
       }else{
-        dateTime = arr(1)
+        dateTime = arr(1)*1000
+        dtl = dateTime.toLong
       }
       val sdf:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
-      date= sdf.format(new Date((dateTime.toLong)))
+      date= sdf.format(new Date(dtl))
       (date,arr(0),arr(2))
 
     }
@@ -65,7 +68,6 @@ object YxdPvUv {
 
     //output hdfs
     pvRdd.saveAsTextFile("/spark/pv")
-
 
 
     //start uv
