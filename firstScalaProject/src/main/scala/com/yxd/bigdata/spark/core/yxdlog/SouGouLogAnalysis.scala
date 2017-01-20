@@ -49,9 +49,10 @@ object SouGouLogAnalysis {
     }).sortBy(tuple => tuple._1)
 
 
-    print(userRdd.collect().foreach(print))
+    //print(userRdd.collect().foreach(print))
 
     filterRdd.unpersist()
+    userRdd.saveAsTextFile("/sougoulog/"+System.currentTimeMillis()+"/")
     //stop sparkcontext
     sparkcontext.stop()
   }
