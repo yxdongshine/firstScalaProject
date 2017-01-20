@@ -1,6 +1,5 @@
 package com.yxd.bigdata.spark.core.yxdlog
 
-import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkContext, SparkConf}
 
 /**
@@ -19,7 +18,7 @@ object SouGouLogAnalysis {
     val sparkcontext = SparkContext.getOrCreate(conf)
 
     //add path rdd
-    val  path = "/sougoulog/SogouQ1.sample"
+    val  path = "/sougoulog/SogouQ.sample"
     val dataPathRdd = sparkcontext.textFile(path)
 
     //filter data
@@ -47,12 +46,12 @@ object SouGouLogAnalysis {
       val key = tuple._1
       val values = tuple._2.toList.distinct.size
       (key,values)
-    })
+    }).sortBy(tuple => tuple._1)
 
 
     print(userRdd.collect().foreach(print))
 
-
+    filterRdd.unpersist()
     //stop sparkcontext
     sparkcontext.stop()
   }
