@@ -23,6 +23,7 @@ object YxdTopN {
     .map(tuple => (tuple._2,tuple._1))
 
     rdd.foreach(print)
+    Thread.sleep(50000)
     sparkConf.stop()
   }
 
