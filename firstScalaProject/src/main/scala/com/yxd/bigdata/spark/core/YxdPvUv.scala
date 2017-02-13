@@ -20,7 +20,7 @@ object YxdPvUv {
       .setMaster("local[*]")
       .setAppName("yxdtop")
     val sparkcontext = new SparkContext(conf)
-    val  path = "/eventLogs/2016/12/21/FlumeData.1482392151826.log"
+    val  path = "/eventLogs/2017/01/02/FlumeData.1483327088054.log"
     val  pathRdd = sparkcontext.textFile(path)
     val  lengthFilterRdd = pathRdd.filter(line => line.length>0)
     val  arrthreeFilterRdd =  lengthFilterRdd.filter(line =>line.split("\\^A").size==3 )
