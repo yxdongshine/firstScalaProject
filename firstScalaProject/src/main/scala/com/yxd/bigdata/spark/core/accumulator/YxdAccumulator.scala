@@ -53,8 +53,29 @@ object YxdAccumulator {
      })
 
 
-    println(s"Input Size:${inputAccumulator.value}")
-    println(s"Ouput Size:${outAccumulator.value}")
+    println({inputAccumulator.value})
+    println({outAccumulator.value})
+
+
+    //实现复杂累加器分区统计
+    //广播自定义复杂累加器
+    val defineSelfAccumulableParam = sparkContext.accumulator(defineSelfAccumulableParam)
+    rddData
+      .foreachPartition(
+       part => {
+         part.foreach(
+           line => {
+             line.filter(_ != null)
+               .split(",")
+               .map(
+                 mline => defineSelfAccumulableParam + mline
+               )
+           }
+         )
+       }
+      )
+
+
 
 
 /*
