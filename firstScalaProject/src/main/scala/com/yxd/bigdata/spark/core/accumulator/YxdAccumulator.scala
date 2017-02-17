@@ -2,6 +2,8 @@ package com.yxd.bigdata.spark.core.accumulator
 
 import org.apache.spark.{SparkContext, SparkConf}
 
+import scala.collection.mutable
+
 /**
  * Created by 20160905 on 2017/2/16.
  */
@@ -57,9 +59,10 @@ object YxdAccumulator {
     println({outAccumulator.value})
 
 
+    println(s"=================")
     //实现复杂累加器分区统计
     //广播自定义复杂累加器
-    val defineSelfAccumulableParam = sparkContext.accumulator(defineSelfAccumulableParam)
+    val defineSelfAccumulableParam = sparkContext.accumulable(mutable.Map[String, Int]())(DefineSelfAccumulableParam)
     rddData
       .foreachPartition(
        part => {
@@ -68,7 +71,7 @@ object YxdAccumulator {
              line.filter(_ != null)
                .split(",")
                .map(
-                 mline => defineSelfAccumulableParam + mline
+                 mline => defineSelfAccumulableParam += mline
                )
            }
          )
@@ -76,6 +79,8 @@ object YxdAccumulator {
       )
 
 
+    //自动以输出
+    defineSelfAccumulableParam.value.foreach(println)
 
 
 /*
