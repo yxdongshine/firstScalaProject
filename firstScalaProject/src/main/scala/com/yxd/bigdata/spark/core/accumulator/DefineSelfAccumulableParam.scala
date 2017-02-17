@@ -4,11 +4,10 @@ import akka.actor.FSM.->
 import org.apache.spark.AccumulableParam
 
 import scala.collection.mutable
-
 /**
- * Created by Administrator on 2017/2/16 0016.
+ * Created by 20160905 on 2017/2/17.
  */
-object DefineSelfAccumulableParame  extends AccumulableParam[mutable.Map[String,Int] , String]{
+object DefineSelfAccumulableParam extends AccumulableParam[mutable.Map[String,Int] , String]{
 
 
   /**
@@ -48,3 +47,4 @@ object DefineSelfAccumulableParame  extends AccumulableParam[mutable.Map[String,
   override def zero(initialValue: mutable.Map[String, Int]): mutable.Map[String, Int] = initialValue
 
 }
+
