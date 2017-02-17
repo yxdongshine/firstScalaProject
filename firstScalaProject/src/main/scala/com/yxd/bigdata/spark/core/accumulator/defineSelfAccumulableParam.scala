@@ -8,7 +8,7 @@ import scala.collection.mutable
 /**
  * Created by Administrator on 2017/2/16 0016.
  */
-object DefineSelfAccumulableParam  extends AccumulableParam[mutable.Map[String,Int] , String]{
+object defineSelfAccumulableParam  extends AccumulableParam[mutable.Map[String,Int] , String]{
 
 
   /**
