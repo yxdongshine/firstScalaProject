@@ -88,10 +88,9 @@ public class YxdJavaSparkCore {
                         }
                         //最后关闭连接
                         JavaJdbc.getInstance().closeConn();
+
                     }
                 }
         );
-
-
     }
 }
