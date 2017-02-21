@@ -638,14 +638,14 @@ public class RawLocalFileSystem extends FileSystem {
   @Override
   public void setPermission(Path p, FsPermission permission)
     throws IOException {
-    if (NativeIO.isAvailable()) {
+   /* if (NativeIO.isAvailable()) {
       NativeIO.POSIX.chmod(pathToFile(p).getCanonicalPath(),
                      permission.toShort());
     } else {
       String perm = String.format("%04o", permission.toShort());
       //Shell.execCommand(Shell.getSetPermissionCommand(perm, false,
       //  FileUtil.makeShellPath(pathToFile(p), true)));
-    }
+    }*/
   }
  
   /**
