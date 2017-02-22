@@ -49,8 +49,26 @@ object JdbcSparkSql {
     println("=========================================")
     //读RDMB数据进来展示
     sqlContext
+    .read
+    .jdbc(url,
+        "stats_hourly",
+        "platform_dimension_id", //分区字段 只能整数
+        1,//选择范围的下线
+        3,//选择范围的上线
+        3,//分区数目
+         pros)
+      .show()
+    //注册临时表
+    sqlContext
       .read
-    .jdbc(url,"stats_hourly",pros)
+/*      .jdbc(url,
+        "stats_hourly",
+        "platform_dimension_id", //分区字段 只能整数
+        1,//选择范围的下线
+        3,//选择范围的上线
+        3,//分区数目
+        pros)*/
+      .jdbc(url,"stats_hourly",Array("platform_dimension_id>2"),pros)
     .registerTempTable("tem_stats_hourly")
 
     println("================jion=========================")
