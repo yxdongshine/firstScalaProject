@@ -566,7 +566,7 @@ public class RawLocalFileSystem extends FileSystem {
     }
 
     /// loads permissions, owner, and group from `ls -ld`
-    private void loadPermissionInfo() {
+    private void loadPermissionInfo() {/*
       IOException e = null;
       try {
         String output = FileUtil.execCommand(new File(getPath().toUri()), 
@@ -611,7 +611,7 @@ public class RawLocalFileSystem extends FileSystem {
                                      "file permissions : " + 
                                      StringUtils.stringifyException(e));
         }
-      }
+      }*/
     }
 
     @Override
