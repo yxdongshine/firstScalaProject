@@ -110,6 +110,24 @@ object SparkHiveWindow {
       .sql(sql4)
       .show()
 
+
+    println("=============udaf============================")
+    //实现统计按照平台23点的浏览总数和平均数
+    val  sql5 =
+      "select avg(t.hour23), avgUdaf(t.hour23) from ("+
+        "select " +
+          "platformMap(tsh.platform_dimension_id) as pname, tsh.date_dimension_id,tsh.kpi_dimension_id,tsh.hour23, " +
+          " rank()  over(partition by tsh.platform_dimension_id order by hour23 desc ), " +
+          " ROW_NUMBER() over(partition by tsh.platform_dimension_id order by hour23 ) as rn  "+
+          "from tmp_stats_hourly as tsh "+
+      " ) t " +
+        "group by t.hour23"
+    //注册udaf
+    sqlContext.udf.register("avgUdaf",SparkSqlUdaf)
+
+    sqlContext
+    .sql(sql5)
+    .show()
   }
 
 }
