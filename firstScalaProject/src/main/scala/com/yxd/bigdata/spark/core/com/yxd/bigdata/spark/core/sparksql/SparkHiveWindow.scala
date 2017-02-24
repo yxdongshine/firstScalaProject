@@ -62,15 +62,72 @@ object SparkHiveWindow {
      * dense_rank和rank都是排名函数，区别在于dense_rank是连续排名，rank遇到排名并列时，下一列排名跳空
      */
     val  sql3  =
+    "select * from ("+
       "select " +
         "tsh.platform_dimension_id , tsh.date_dimension_id,tsh.kpi_dimension_id,tsh.hour11, " +
-        " rank()  over(partition by tsh.platform_dimension_id order by hour11 desc " +
-        "ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING ) " +
-        "from tmp_stats_hourly as tsh "
+        " rank()  over(partition by tsh.platform_dimension_id order by hour11 desc ), " +
+        " ROW_NUMBER() over(partition by tsh.platform_dimension_id order by hour11 desc ) as rn "+
+        "from tmp_stats_hourly as tsh "+
+    " ) t " +
+      "where t.rn < 2 "
     sqlContext
       .sql(sql3)
       .show()
 
+
+
+    println("=============udf============================")
+
+    /**
+     * 在上面的组内排序的基础上 将platform_dimension_id 映射成具体的平台名称
+     */
+
+    //注册udf函数
+
+
+    sqlContext.udf.register("platformMap",
+      (s: String) => {
+        s match {
+          case "1" =>("浏览器")
+          case "2" =>("手机")
+          case "3" =>("系统")
+          case _ =>("其他")
+        }
+
+      }
+    )
+
+    val  sql4 =
+      "select * from ("+
+        "select " +
+        "platformMap(tsh.platform_dimension_id) , tsh.date_dimension_id,tsh.kpi_dimension_id,tsh.hour11, " +
+        " rank()  over(partition by tsh.platform_dimension_id order by hour11 desc ), " +
+        " ROW_NUMBER() over(partition by tsh.platform_dimension_id order by hour11 desc ) as rn "+
+        "from tmp_stats_hourly as tsh "+
+        " ) t " +
+        "where t.rn < 2 "
+    sqlContext
+      .sql(sql4)
+      .show()
+
+
+    println("=============udaf============================")
+    //实现统计按照平台23点的浏览总数和平均数
+    val  sql5 =
+      "select avg(t.hour23), avgUdaf(t.hour23) from ("+
+        "select " +
+          "platformMap(tsh.platform_dimension_id) as pname, tsh.date_dimension_id,tsh.kpi_dimension_id,tsh.hour23, " +
+          " rank()  over(partition by tsh.platform_dimension_id order by hour23 desc ), " +
+          " ROW_NUMBER() over(partition by tsh.platform_dimension_id order by hour23 ) as rn  "+
+          "from tmp_stats_hourly as tsh "+
+      " ) t " +
+        "group by t.hour23"
+    //注册udaf
+    sqlContext.udf.register("avgUdaf",SparkSqlUdaf)
+
+    sqlContext
+    .sql(sql5)
+    .show()
   }
 
 }
