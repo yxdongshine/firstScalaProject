@@ -14,8 +14,7 @@ object CvsDataSetsDsl {
     val sc = SparkContext.getOrCreate(sparkConf)
     //SqlContext 和 HiveContext 区别 后者继承了sqlContext ;不需要hive相关内容就
     //使用前者，需要就使用后者；后者缺陷就是易产生perm menmery 内存溢出
-    val sqlContext = new SQLContext(sc)
-    import sqlContext.implicits._
+    val sqlContext = new HiveContext(sc)
     //cvs path
     val cvsPath = "/sparksql/csvdata"
     val formatType = "com.databricks.spark.csv"
@@ -26,8 +25,12 @@ object CvsDataSetsDsl {
     .format(formatType)
       .option("header","false")
     .load(cvsPath)
+    .toDF("id", "longitude", "latitude", "time") //隐士转换 成对象
 
     df.show(1)
+
+    //注册成临时表
+    df.registerTempTable("tmp_taxi")
 
     /*println("=======DataSets==========")
     //DataSets模式读入展示
