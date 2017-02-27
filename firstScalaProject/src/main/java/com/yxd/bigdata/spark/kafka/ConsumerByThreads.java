@@ -47,6 +47,7 @@ public class ConsumerByThreads implements  Runnable{
          * 如果发送数据是string类型，必须更改StringEncoder
          */
         properties.put("serializer.class", "kafka.serializer.StringEncoder");
+        properties.put("partitioner.class","com.yxd.bigdata.spark.kafka.ConsumerPartitioner".trim());
         //创建ProducerConfig
         ProducerConfig producerConfig = new ProducerConfig(properties);
         //创建 producer
@@ -59,9 +60,9 @@ public class ConsumerByThreads implements  Runnable{
      * @param threadNum
      * @return
      */
-    public KeyedMessage ProducerKeyMsg(Long threadNum){
+    public KeyedMessage<String, String> ProducerKeyMsg(Long threadNum){
 
-        KeyedMessage keyedMessage = new KeyedMessage(topicName,DISS_KEY+threadNum,DISS_VALUE+threadNum);
+        KeyedMessage<String, String> keyedMessage = new KeyedMessage(topicName,DISS_KEY+threadNum,DISS_VALUE+threadNum);
         return  keyedMessage;
     }
 
@@ -70,7 +71,7 @@ public class ConsumerByThreads implements  Runnable{
      * 发送消息
      * @param keyedMessage
      */
-    public  void sendMsg(KeyedMessage keyedMessage){
+    public  void sendMsg(KeyedMessage<String, String> keyedMessage){
 
         producer.send(keyedMessage);
 
@@ -82,20 +83,20 @@ public class ConsumerByThreads implements  Runnable{
 
         for( Integer i =0 ; i<threadNum ; i++){
            new Thread(new Runnable() {
-               public void run() {
-                   while (ConsumerThreadsBasic.isRunning.get()){
-                       //多线程之间发送消息
-                       //创建消息
-                       KeyedMessage keyedMessage = ProducerKeyMsg(Thread.currentThread().getId());
-                       //发送消息
-                       sendMsg(keyedMessage);
-                       //这里需要让出cpu
-                       try {
-                           Thread.sleep(random.nextInt(1000) );
-                       } catch (InterruptedException e) {
-                           // nothings
+               public synchronized void run() {
+                       while (ConsumerThreadsBasic.isRunning.get()) {
+                           //多线程之间发送消息
+                           //创建消息
+                           KeyedMessage keyedMessage = ProducerKeyMsg(Thread.currentThread().getId());
+                           //发送消息
+                           sendMsg(keyedMessage);
+                           //这里需要让出cpu
+                           try {
+                               wait(100);
+                           } catch (InterruptedException e) {
+                               // nothings
+                           }
                        }
-                   }
                }
            }).start();
         }

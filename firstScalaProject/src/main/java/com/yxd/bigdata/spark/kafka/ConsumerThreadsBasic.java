@@ -7,12 +7,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ConsumerThreadsBasic {
 
-    public static AtomicBoolean isRunning = new AtomicBoolean(true);
+
+    public static  AtomicBoolean isRunning = new AtomicBoolean(true);
 
     public static void main(String[] args) {
 
         String togicName = "yxdkafka0";
-        Integer threadNum = 3 ;
+        Integer threadNum = 30 ;
 
         //调用生产者
         ConsumerByThreads cbt = new ConsumerByThreads(togicName,threadNum);
