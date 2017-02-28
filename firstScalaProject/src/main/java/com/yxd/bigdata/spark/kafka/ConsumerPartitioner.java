@@ -23,11 +23,14 @@ public class ConsumerPartitioner implements Partitioner {
     public ConsumerPartitioner(VerifiableProperties properties) {
         // nothings
     }
+
     public int partition(Object key, int numPartitions) {
         System.out.println(key + ":" + numPartitions);
         String tmp = (String) key;
         int index = tmp.lastIndexOf('_');
         int number = Integer.valueOf(tmp.substring(index + 1));
-        return number % numPartitions;
+        int indexPartition = number % numPartitions;
+        System.out.println(indexPartition);
+        return indexPartition;
     }
 }
