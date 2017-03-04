@@ -1,6 +1,5 @@
 package com.yxd.bigdata.spark.core.com.yxd.bigdata.spark.core.sparksql
 
-import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkContext, SparkConf}
 
@@ -96,7 +95,7 @@ object CvsDataSetsDsl {
     /**
      * DSL 简单操作
      *
-     *  "select  subString(tt.time,0,2)  as hour,id, count(id) as num  from tmp_taxi as tt " +
+     * "select  subString(tt.time,0,2)  as hour,id, count(id) as num  from tmp_taxi as tt " +
       "group by subString(tt.time,0,2) , id " +
       "order by hour ,num desc "
      */
