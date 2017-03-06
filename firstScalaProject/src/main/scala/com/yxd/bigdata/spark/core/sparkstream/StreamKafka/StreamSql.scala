@@ -16,12 +16,13 @@ object StreamSql {
     val sparkConf = new SparkConf()
     .setAppName("StreamSql")
     .setMaster("local[*]")
+      .set("spark.eventLog.enabled","true")
+      .set("spark.eventLog.dir","hdfs://hadoop1:9000/spark-history")
 
     val sparkContext = SparkContext.getOrCreate(sparkConf)
     val sparkStream = new StreamingContext(sparkContext,Seconds(10))
-    val sqlContext = new SQLContext(sparkContext)
-    val hiveContext = new HiveContext(sparkContext)
-    import  sqlContext.implicits._
+    //val hiveContext = new HiveContext(sparkContext)
+
     //创建数据连接方式
 
     val topic =Map("yxdkafka0"->3)//消费yxdkafka0 消息主题 三个线程对应三个区
@@ -61,12 +62,19 @@ object StreamSql {
     val wlRdd = traRdd.transform(
         //这里是在dirver中运行的
         rdd => {
+
+
+          //这里创建sqlContext
+          val sqlContext = getSqlContext.getSqlContext(rdd.sparkContext)
+          import  sqlContext.implicits._
+
           //这里在excutor上运行
           rdd
             .filter( line => line.nonEmpty)
             .flatMap(line => line.split(" ").map(world =>(world,1)))
           .toDF("world","num")
           .registerTempTable("tem_world_num")
+
 
           //sql
           sqlContext.sql("select world ,count(world) as num from tem_world_num twn group by twn.world")
@@ -86,7 +94,7 @@ object StreamSql {
     /**
      * http://www.cnblogs.com/awishfullyway/p/6485156.html
      */
-    hiveContext.
+    //hiveContext.
     print("=====wlRdd.print()=======")
     wlRdd.print() // 打印数据
 
@@ -96,4 +104,18 @@ object StreamSql {
 
   }
 
+  object getSqlContext{
+
+    @transient private var instance:SQLContext =_
+
+    def getSqlContext(sparkContext: SparkContext):SQLContext={
+      synchronized {
+      if(instance ==null){
+            instance = new SQLContext(sparkContext)
+         }
+      }
+      instance
+    }
+
+  }
 }
