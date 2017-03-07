@@ -99,7 +99,7 @@ object StreamHive {
         dataFlumeRdd.registerTempTable("tem_world_num")
 
         //插入分区表中
-        hiveContext.sql("insert into stream_world_partition partition(ds='2017-03-06') select world,num from tem_world_num ")
+        hiveContext.sql("insert into table stream_world_partition partition(ds='2017-03-06') select world,num from tem_world_num ")
 
         //sql
         hiveContext.sql("select world ,count(world) as num from tem_world_num twn group by twn.world")

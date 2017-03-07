@@ -12,7 +12,8 @@ object SouGouLogAnalysis {
     val conf = new SparkConf()
       .setAppName("SouGouLogAnalysis")
       .setMaster("local[*]")
-
+      .set("spark.eventLog.enabled","true")
+      .set("spark.eventLog.dir","hdfs://hadoop1:9000/spark-history")
 
     //create sparkcontext
     val sparkcontext = SparkContext.getOrCreate(conf)
