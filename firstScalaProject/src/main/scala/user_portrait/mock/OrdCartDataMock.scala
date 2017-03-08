@@ -16,8 +16,10 @@ import scala.collection.mutable.ArrayBuffer
 object OrdCartDataMock {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf()
-      .setAppName("test1")
+      .setAppName("OrdCartDataMock")
       .setMaster("local[*]")
+      .set("spark.eventLog.enabled","true")
+      .set("spark.eventLog.dir","hdfs://hadoop1:9000/spark-history")
     val sc = SparkContext.getOrCreate(conf)
 
     // ==================================

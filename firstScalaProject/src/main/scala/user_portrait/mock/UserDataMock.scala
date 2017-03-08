@@ -16,6 +16,8 @@ object UserDataMock {
     val conf = new SparkConf()
       .setAppName("test1")
       .setMaster("local[*]")
+      .set("spark.eventLog.enabled","true")
+      .set("spark.eventLog.dir","hdfs://hadoop1:9000/spark-history")
     val sc = SparkContext.getOrCreate(conf)
 
     // =============================
