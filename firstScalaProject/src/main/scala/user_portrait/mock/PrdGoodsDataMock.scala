@@ -19,6 +19,8 @@ object PrdGoodsDataMock {
       .setAppName("prd-goods-data")
       .setMaster("local[*]")
       .set("spark.executor.heartbeatInterval", "360s")
+      .set("spark.eventLog.enabled","true")
+      .set("spark.eventLog.dir","hdfs://hadoop1:9000/spark-history")
     val sc = SparkContext.getOrCreate(conf)
 
     // ==================================

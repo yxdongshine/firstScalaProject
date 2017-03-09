@@ -16,6 +16,8 @@ object ActActiveMainDataMock {
     val conf = new SparkConf()
       .setAppName("act-active-data")
       .setMaster("local[*]")
+      .set("spark.eventLog.enabled","true")
+      .set("spark.eventLog.dir","hdfs://hadoop1:9000/spark-history")
     val sc = SparkContext.getOrCreate(conf)
 
     // =====================================================

@@ -16,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
 object OrdOrderDataMock {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf()
-      .setMaster("local")
+      .setMaster("local[*]")
       .setAppName("ord_order_data_mock")
       .set("spark.eventLog.enabled","true")
       .set("spark.eventLog.dir","hdfs://hadoop1:9000/spark-history")
