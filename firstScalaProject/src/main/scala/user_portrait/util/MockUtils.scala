@@ -54,6 +54,11 @@ object MockUtils {
   // 一天的毫秒数
   val dayOfMillis = 86400000
 
+  //优惠券使用状态
+  val couponStatus = Array(0,1)
+
+
+
   /**
     * 随机产生n个不重复的商品id
     *
