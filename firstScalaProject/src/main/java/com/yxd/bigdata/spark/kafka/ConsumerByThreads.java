@@ -1,9 +1,13 @@
 package com.yxd.bigdata.spark.kafka;
 
+import com.yxd.bigdata.spark.kafka.FileStream.FileIo;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Random;
 
@@ -20,7 +24,9 @@ public class ConsumerByThreads implements  Runnable{
     static final String DISS_KEY="key_" ;//key前缀
     static final String DISS_VALUE="value_" ;//value前缀
     Random random = new Random();
-
+    FileWriter fw = null ;
+    FileIo fileIo = null ;
+    static Long index =  0L ;//记录某条消息的索引
     /**
      * 带参数的狗仔函数
      * @param topicName 消息主题名称
@@ -31,6 +37,19 @@ public class ConsumerByThreads implements  Runnable{
         this.topicName = topicName;
         this.threadNum =threadNum;
         buildProducer();
+
+
+        try {
+            fw =  new FileWriter("producer.txt");
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        fileIo = new FileIo();
     }
 
     /**
@@ -47,7 +66,7 @@ public class ConsumerByThreads implements  Runnable{
          * 如果发送数据是string类型，必须更改StringEncoder
          */
         properties.put("serializer.class", "kafka.serializer.StringEncoder");
-        properties.put("partitioner.class","com.yxd.bigdata.spark.kafka.ConsumerPartitioner".trim());
+        //properties.put("partitioner.class","com.yxd.bigdata.spark.kafka.ConsumerPartitioner".trim());
         //创建ProducerConfig
         ProducerConfig producerConfig = new ProducerConfig(properties);
         //创建 producer
@@ -60,9 +79,11 @@ public class ConsumerByThreads implements  Runnable{
      * @param threadNum
      * @return
      */
-    public KeyedMessage<String, String> ProducerKeyMsg(Long threadNum){
+    public synchronized KeyedMessage<String, String> ProducerKeyMsg(Long threadNum){
 
-        KeyedMessage<String, String> keyedMessage = new KeyedMessage(topicName,DISS_KEY+threadNum,DISS_VALUE+threadNum);
+        KeyedMessage<String, String> keyedMessage = new KeyedMessage(topicName,DISS_KEY+threadNum,index+"");
+        index ++ ;
+
         return  keyedMessage;
     }
 
@@ -73,7 +94,9 @@ public class ConsumerByThreads implements  Runnable{
      */
     public  void sendMsg(KeyedMessage<String, String> keyedMessage){
 
+        fileIo.writeFile(keyedMessage.message() + "", fw);
         producer.send(keyedMessage);
+        System.out.println(keyedMessage.message());
 
     }
     /**

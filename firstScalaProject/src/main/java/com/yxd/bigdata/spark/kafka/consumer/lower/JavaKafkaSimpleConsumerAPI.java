@@ -1,5 +1,6 @@
 package com.yxd.bigdata.spark.kafka.consumer.lower;
 
+import com.yxd.bigdata.spark.kafka.FileStream.FileIo;
 import kafka.api.*;
 import kafka.cluster.Broker;
 import kafka.common.ErrorMapping;
@@ -19,6 +20,9 @@ import kafka.javaapi.TopicMetadataResponse;
 import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.message.MessageAndOffset;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -35,6 +39,24 @@ public class JavaKafkaSimpleConsumerAPI {
     // 缓存Topic/Partition对应的Broker连接信息
     private Map<KafkaTopicPartitionInfo, List<KafkaBrokerInfo>> replicaBrokers = new HashMap<KafkaTopicPartitionInfo, List<KafkaBrokerInfo>>();
 
+    FileWriter fw = null ;
+    FileIo fileIo = null ;
+
+    public JavaKafkaSimpleConsumerAPI(int part){
+
+        try {
+            fw =  new FileWriter("consumer"+part+".txt");
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        fileIo = new FileIo();
+    }
+
     /**
      * 运行入口
      *
@@ -43,7 +65,7 @@ public class JavaKafkaSimpleConsumerAPI {
      * @param seedBrokers        连接topic分区的初始化连接信息
      * @throws Exception
      */
-    public void run(long maxReads,
+    public synchronized void run(long maxReads,
                     KafkaTopicPartitionInfo topicPartitionInfo,
                     List<KafkaBrokerInfo> seedBrokers) throws Exception {
         // 默认消费数据的偏移量是当前分区的最早偏移量值
@@ -69,7 +91,12 @@ public class JavaKafkaSimpleConsumerAPI {
         try {
             // 获取当前topic、当前consumer的消费数据offset偏移量
             int times = 0;
-            long readOffSet = -1;
+            Long readOffSet = -1L;
+
+            synchronized(readOffSet){
+
+
+
             while (true) {
                 readOffSet = this.getLastOffSet(consumer, groupId, topic, partitionID, whichTime, clientName);
                 if (readOffSet == -1) {
@@ -150,7 +177,9 @@ public class JavaKafkaSimpleConsumerAPI {
 
                     byte[] bytes = new byte[payload.limit()];
                     payload.get(bytes);
-                    System.out.println(currentOffset + "-->" + messageKey + ": " + new String(bytes, "UTF-8"));
+                    String mv = new String(bytes, "UTF-8");
+                    System.out.println(currentOffset + "-->" + messageKey + ": " + mv);
+                    fileIo.writeFile(mv + "", fw);
                     numRead++;
                     maxReads--;
                 }
@@ -158,6 +187,8 @@ public class JavaKafkaSimpleConsumerAPI {
                 // 更新偏移量
                 consumer = this.updateOffset(consumer, topic, partitionID,
                         readOffSet, groupId, clientName, 0);
+
+
 
                 // 如果没有读取数据，休眠一秒钟
                 if (numRead == 0) {
@@ -168,7 +199,7 @@ public class JavaKafkaSimpleConsumerAPI {
                     }
                 }
             }
-
+            }
             System.out.println("执行完成....");
         } finally {
             // 关闭资源
@@ -293,7 +324,7 @@ public class JavaKafkaSimpleConsumerAPI {
      * @param clientName  client名称
      * @return 正常情况下，返回非负数，当出现异常的时候，返回-1
      */
-    public long getLastOffSet(SimpleConsumer consumer, String groupId,
+    public  synchronized long getLastOffSet(SimpleConsumer consumer, String groupId,
                               String topic, int partitionID,
                               long whichTime, String clientName) {
         // 1. 从ZK中获取偏移量，当zk的返回偏移量大于0的时候，表示是一个正常的偏移量
@@ -409,7 +440,7 @@ public class JavaKafkaSimpleConsumerAPI {
      * @return
      * @throws RuntimeException 当更新失败的情况下
      */
-    private SimpleConsumer updateOffset(SimpleConsumer consumer, String topic, int partitionID, long readOffSet, String groupId, String clientName, int times) {
+    private  synchronized SimpleConsumer updateOffset(SimpleConsumer consumer, String topic, int partitionID, long readOffSet, String groupId, String clientName, int times) {
         // 构建请求对象
         Map<TopicAndPartition, OffsetAndMetadata> requestInfoMap = new HashMap<TopicAndPartition, OffsetAndMetadata>();
         TopicAndPartition topicAndPartition = new TopicAndPartition(topic, partitionID);
